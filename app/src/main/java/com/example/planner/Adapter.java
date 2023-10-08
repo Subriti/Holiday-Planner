@@ -17,6 +17,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.LatLng;
@@ -63,6 +64,12 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         holder.quntity.setText("Qty:  "+modelList.get(position).getQuantity());
         holder.price.setText("Price:  ₹" + modelList.get(position).getPrice());
         holder.description.setText(modelList.get(position).getDescription());
+        // Load the image into the imgItem ImageView using Glide
+        Glide.with(context)
+                .load(modelList.get(position).getItemImg())
+                .placeholder(R.drawable.addtocart) // Optional: Placeholder image while loading
+                .error(R.drawable.addtocart) // Optional: Image to display on error
+                .into(holder.imgItem);
 
         holder.mapView.getMapAsync(googleMap -> {
             LatLng location = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
@@ -203,7 +210,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder {
         MapView mapView;
         TextView name, quntity, price, description;
-        ImageView edit, delete, share;
+        ImageView edit, delete, share, imgItem;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -217,6 +224,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             edit = itemView.findViewById(R.id.edit);
             delete = itemView.findViewById(R.id.delete);
             share = itemView.findViewById(R.id.share);
+            imgItem= itemView.findViewById(R.id.imgItem);
 
         }
     }

@@ -19,10 +19,12 @@
 
         <!-- Item Image -->
         <ImageView
+            android:id="@+id/imgItem"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
             android:layout_marginBottom="4dp"
+            android:scaleType="centerCrop"
             android:src="@drawable/addtocart" />
 
         <!-- Item Name -->
