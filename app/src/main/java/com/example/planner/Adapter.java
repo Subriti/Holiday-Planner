@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,7 +52,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     @NonNull
     @Override
     public Adapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new Adapter.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false));
+        return new Adapter.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.listwimg, parent, false));
 
     }
 
@@ -59,8 +60,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     public void onBindViewHolder(@NonNull Adapter.ViewHolder holder, int position) {
         GeoPoint geoPoint = modelList.get(position).getLocation();
         holder.name.setText(modelList.get(position).getName());
-        holder.quntity.setText(modelList.get(position).getQuantity());
-        holder.price.setText(" Rs." + modelList.get(position).getPrice());
+        holder.quntity.setText("Qty:  "+modelList.get(position).getQuantity());
+        holder.price.setText("Price:  ₹" + modelList.get(position).getPrice());
         holder.description.setText(modelList.get(position).getDescription());
 
         holder.mapView.getMapAsync(googleMap -> {
@@ -202,7 +203,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder {
         MapView mapView;
         TextView name, quntity, price, description;
-        Button edit, delete, share;
+        ImageView edit, delete, share;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

@@ -51,7 +51,8 @@ public class AllActivity extends AppCompatActivity {
 
         //noItem.setVisibility(View.INVISIBLE);
 
-        currentUser.setText(sharedPreferences.getUsername() + "'s Holiday Requirements");
+        //currentUser.setText(sharedPreferences.getUsername() + "'s Holiday Requirements");
+        currentUser.setText("Requirements");
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override

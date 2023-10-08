@@ -1,7 +1,6 @@
 package com.example.planner;
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
-import static androidx.core.content.ContentProviderCompat.requireContext;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,7 +9,6 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -47,14 +45,11 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.OnProgressListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -89,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mPhone = findViewById(R.id.phone);
         mDescription = findViewById(R.id.description);
         mSubmitBtn = findViewById(R.id.submit);
-        textView= findViewById(R.id.textView4);
+        textView= findViewById(R.id.back);
         btnGallery= findViewById(R.id.btnGallery);
         img= findViewById(R.id.picture_to_be_posted);
 
@@ -99,6 +94,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
                 startActivityForResult(Intent.createChooser(intent, "Select picture to post"), galleryRequestCode);
+            }
+        });
+
+        img.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent, "Select picture to post"), galleryRequestCode);
+            }
+        });
+
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
             }
         });
 
@@ -119,13 +130,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //getting picture
             Glide.with(this).load(model.itemImg).into(img);
 
+            //hide add button
+            btnGallery.setVisibility(View.INVISIBLE);
+
             //model needs editing
-            mSubmitBtn.setText("Update");
-            textView.setText("Edit Item");
+            mSubmitBtn.setText("Update Item");
+            //textView.setText("Edit Item");
         }
         else{
-            mSubmitBtn.setText("Submit");
-            textView.setText("Add New Item");
+            mSubmitBtn.setText("Add Item");
+            //textView.setText("Add New Item");
         }
 
         fStore = FirebaseFirestore.getInstance();
@@ -177,14 +191,103 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mSubmitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //first upload image to firebase
-                uploadImage();
+                String fullname = mFullName.getText().toString().trim();
+                String fooditem = mFoodItem.getText().toString().trim();
+                String description = mDescription.getText().toString().trim();
+                String phone = mPhone.getText().toString().trim();
+
+                String uID= sharedPreferences.getUserID();
+
+                if (TextUtils.isEmpty(fullname)) {
+                    mFullName.setError("Name is required.");
+                    return;
+                }
+
+                if (TextUtils.isEmpty(fooditem)) {
+                    mFoodItem.setError("Quantity is required.");
+                    return;
+                }
+
+                //new image selected
+                if (filePath!=null){
+                    //first upload image to firebase get download URL
+                    uploadImage(uID, fullname, fooditem, description, phone);
+                }
+                // no change in image: change details only
+                else{
+                    saveDetails(uID, fullname, fooditem, description, phone);
+                }
             }
         });
     }
 
-    private void uploadImage() {
-        if (filePath != null || downloadURL!=null) {
+    private void saveDetails(String uID, String fullname, String fooditem, String description, String phone) {
+
+        //DocumentReference documentReference = fStore.collection("donate").document(userID);
+        CollectionReference collectionReference = fStore.collection("user data");
+
+        GeoPoint geoPoint = new GeoPoint(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        Map<String, Object> user = new HashMap<>();
+        user.put("timestamp", FieldValue.serverTimestamp());
+        user.put("name", fullname);
+        user.put("quantity", fooditem);
+        user.put("price", phone);
+        user.put("description", description);
+        user.put("location", geoPoint);
+        //associating user with each item list
+        user.put("userId",uID);
+        user.put("itemImg",downloadURL);
+
+        if(mSubmitBtn.getText()=="Submit"){
+            String uuid = UUID.randomUUID().toString();
+            user.put("docId",uuid);
+            collectionReference.document(uuid).set(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Success!");
+                            //startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                            Intent intent = new Intent(MainActivity.this, AllActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "Error!", e);
+                        }
+                    });
+        }
+        else{
+            SharedPreferences sharedPreferences = getSharedPreferences("edit", MODE_PRIVATE);
+
+            // Retrieve data from SharedPreferences
+            String doc = sharedPreferences.getString("docId", "");
+            collectionReference.document(doc).update(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Success!");
+                            Intent intent = new Intent(MainActivity.this, AllActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "Error!", e);
+                        }
+                    });
+        }
+    }
+
+    //fix edit and updatee image and info null not null
+    private void uploadImage(String uID, String fullname, String fooditem, String description, String phone) {
+        if (filePath != null) {
             // Code for showing progressDialog while uploading
             /*ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("Uploading...");
@@ -217,88 +320,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                                     // Save the downloadURL to the database
                                     System.out.println("Final download URL: " + downloadURL);
-
-                                    //add other details
-                                    System.out.println("Download URL: "+downloadURL);
-
-                                    String fullname = mFullName.getText().toString().trim();
-                                    String fooditem = mFoodItem.getText().toString().trim();
-                                    String description = mDescription.getText().toString().trim();
-                                    String phone = mPhone.getText().toString().trim();
-
-                                    String uID= sharedPreferences.getUserID();
-
-                                    if (TextUtils.isEmpty(fullname)) {
-                                        mFullName.setError("Name is required.");
-                                        return;
-                                    }
-
-                                    if (TextUtils.isEmpty(fooditem)) {
-                                        mFoodItem.setError("Quantity is required.");
-                                        return;
-                                    }
-
-                                    //DocumentReference documentReference = fStore.collection("donate").document(userID);
-                                    CollectionReference collectionReference = fStore.collection("user data");
-
-                                    GeoPoint geoPoint = new GeoPoint(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                                    Map<String, Object> user = new HashMap<>();
-                                    user.put("timestamp", FieldValue.serverTimestamp());
-                                    user.put("name", fullname);
-                                    user.put("quantity", fooditem);
-                                    user.put("price", phone);
-                                    user.put("description", description);
-                                    user.put("location", geoPoint);
-                                    //associating user with each item list
-                                    user.put("userId",uID);
-                                    user.put("itemImg",downloadURL);
-
-                                    if(mSubmitBtn.getText()=="Submit"){
-                                        String uuid = UUID.randomUUID().toString();
-                                        user.put("docId",uuid);
-                                        collectionReference.document(uuid).set(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_SHORT).show();
-                                                        Log.d(TAG, "Success!");
-                                                        //startActivity(new Intent(getApplicationContext(),MainActivity.class));
-                                                        Intent intent = new Intent(MainActivity.this, AllActivity.class);
-                                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                        startActivity(intent);
-                                                    }
-                                                })
-                                                .addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
-                                                        Log.w(TAG, "Error!", e);
-                                                    }
-                                                });
-                                    }
-                                    else{
-                                        SharedPreferences sharedPreferences = getSharedPreferences("edit", MODE_PRIVATE);
-
-                                        // Retrieve data from SharedPreferences
-                                        String doc = sharedPreferences.getString("docId", "");
-                                        collectionReference.document(doc).update(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_SHORT).show();
-                                                        Log.d(TAG, "Success!");
-                                                        Intent intent = new Intent(MainActivity.this, AllActivity.class);
-                                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                        startActivity(intent);
-                                                    }
-                                                })
-                                                .addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
-                                                        Log.w(TAG, "Error!", e);
-                                                    }
-                                                });
-                                    }
-
+                                    saveDetails(uID, fullname, fooditem, description, phone);
                                 }
                             });
                         }
@@ -321,7 +343,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             progressDialog.setMessage("Uploaded " + (int) progress + "%");
                         }
                     });*/
-        } else {
+        }
+        else {
             Toast.makeText(
                     MainActivity.this, "Please select a picture to proceed.", Toast.LENGTH_SHORT
             ).show();
@@ -345,6 +368,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 MainActivity.this.getContentResolver(), filePath
                         );
                         img.setImageBitmap(bitmap);
+                        btnGallery.setVisibility(View.INVISIBLE);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
