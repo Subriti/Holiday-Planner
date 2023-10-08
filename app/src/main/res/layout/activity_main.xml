@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundColor"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Edit Item"
+        android:textAlignment="center"
+        android:textColor="@color/purple_200"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/textView4">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:padding="10dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="5dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/nameError"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@color/darkGrey"
+
+                            android:textColorHint="@color/white"
+                            app:hintTextColor="@color/black">
+
+                            <EditText
+                                android:id="@+id/donorname"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+
+                                android:background="@color/darkGrey"
+                                android:fontFamily="@font/opensans"
+                                android:hint="Product Name"
+                                android:importantForAutofill="no"
+                                android:inputType="text"
+                                android:maxLines="1"
+                                android:singleLine="true"
+                                android:textColor="@color/white"
+                                android:textSize="16sp"
+                                tools:ignore="UnusedAttribute" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/itemError"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:background="@color/darkGrey"
+
+                            android:textColorHint="@color/white"
+                            app:hintTextColor="@color/black">
+
+                            <EditText
+                                android:id="@+id/fooditem"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+
+                                android:background="@color/darkGrey"
+                                android:fontFamily="@font/opensans"
+                                android:hint="Quantity"
+                                android:importantForAutofill="no"
+                                android:inputType="text"
+                                android:maxLines="2"
+                                android:singleLine="true"
+                                android:textColor="@color/white"
+                                android:textSize="16sp"
+                                tools:ignore="UnusedAttribute" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/phoneError"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:background="@color/darkGrey"
+                            android:textColorHint="@color/white"
+                            app:boxStrokeColor="@color/black"
+                            app:hintTextColor="@color/black">
+
+                            <EditText
+                                android:id="@+id/phone"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+
+                                android:background="@color/darkGrey"
+                                android:fontFamily="@font/opensans"
+                                android:hint="Price"
+                                android:importantForAutofill="no"
+                                android:inputType="phone"
+                                android:maxLength="12"
+                                android:maxLines="1"
+                                android:singleLine="true"
+                                android:textColor="@color/white"
+                                android:textSize="16sp"
+                                tools:ignore="UnusedAttribute" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:background="@color/darkGrey"
+                            android:fontFamily="@font/opensans"
+                            android:textColorHint="@color/white"
+
+                            android:textSize="20sp"
+                            app:hintTextColor="@color/black">
+
+                            <EditText
+                                android:id="@+id/description"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="10dp"
+
+                                android:background="@color/darkGrey"
+                                android:fontFamily="@font/opensans"
+                                android:hint="Description"
+                                android:importantForAutofill="no"
+                                android:inputType="textMultiLine"
+                                android:maxLines="10"
+                                android:textColor="@color/white"
+                                android:textSize="16sp"
+                                tools:ignore="UnusedAttribute" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
+                            android:id="@+id/google_map"
+                            android:name="com.google.android.gms.maps.SupportMapFragment"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="20dp"
+                            map:uiZoomControls="true"
+                            tools:ignore="FragmentTagUsage" />
+
+                        <Button
+                            android:id="@+id/submit"
+                            android:layout_width="match_parent"
+                            android:layout_height="60dp"
+                            android:layout_margin="20dp"
+                            android:backgroundTint="@color/purple_200"
+                            android:text="submit"
+
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            tools:ignore="UnusedAttribute" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@drawable/calendar"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/calendar"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SuiteCase"
+        tools:targetApi="31">
+        <activity
+            android:name=".AllActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SplashScreen"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--<meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="vpk.eyJ1IjoicmlzaGFiaDAwNyIsImEiOiJjbGJiMjM5dHEwNDQyM3d1cGZ1bHE0dTEwIn0.Cj0ByZlzzqhu43sH-DHPRA"/>-->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCwIOIDC6JtWizFZ9jD-g62js3BNQ5kNEs" />
+    </application>
+
+</manifest>

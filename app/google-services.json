@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "130783306624",
+    "project_id": "curd-727e6",
+    "storage_bucket": "curd-727e6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:130783306624:android:440d46fe2248c65cf1d765",
+        "android_client_info": {
+          "package_name": "com.example.planner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCe5dbHfgB6z0h36Wk8Gz_s0GHQpgjPfPU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
