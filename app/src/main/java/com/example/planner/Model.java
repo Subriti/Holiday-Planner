@@ -6,6 +6,7 @@ import com.google.firebase.firestore.GeoPoint;
 import java.io.Serializable;
 
 public class Model implements Serializable {
+    Double latitude, longitude;
     String description;
     String docId;
     String quantity;
@@ -18,7 +19,6 @@ public class Model implements Serializable {
 
     // Flag to indicate whether the item is expanded
     private boolean isExpanded;
-
     boolean isPurchased= false;
 
     public Model() {
@@ -54,6 +54,16 @@ public class Model implements Serializable {
         this.name = name;
         this.price = price;
         this.itemImg=itemImg;
+    }
+
+    public Model(String name, String quantity, String price, String description, String itemImg, Double latitude, Double longitude) {
+        this.description = description;
+        this.quantity = quantity;
+        this.name = name;
+        this.price = price;
+        this.itemImg=itemImg;
+        this.latitude= latitude;
+        this.longitude= longitude;
     }
 
     public String getUserId() {
@@ -130,4 +140,10 @@ public class Model implements Serializable {
 
     public Boolean getIsPurchased(){return isPurchased;}
     public void setIsPurchased(Boolean value){this.isPurchased= value;}
+
+    public Double getLatitude(){return latitude;}
+    public void setLatitude(Double latitude){this.latitude=latitude;}
+
+    public Double getLongitude(){return longitude;}
+    public void setLongitude(Double longitude){this.longitude=longitude;}
 }

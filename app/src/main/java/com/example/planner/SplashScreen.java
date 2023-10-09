@@ -26,7 +26,7 @@ public class SplashScreen extends AppCompatActivity {
         System.out.println(sharedPreferences.isLoggedIn());
         if (sharedPreferences.isLoggedIn()) {
             // Do something for the logged user; open AllActivity
-            Intent intent = new Intent(this, AllActivity.class);
+            Intent intent = new Intent(this, DashboardActivity.class);
             startActivity(intent);
             finish();
         } else {
@@ -61,17 +61,6 @@ public class SplashScreen extends AppCompatActivity {
                     startActivity(intent);
                 }
             });
-
-        /*// we used the postDelayed(Runnable, time) method
-        // to send a message with a delayed time.
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(SplashScreen.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        }, 3000); // 3000 is the delayed time in milliseconds.*/
         }
     }
 }

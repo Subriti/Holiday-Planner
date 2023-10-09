@@ -2,11 +2,6 @@ package com.example.planner;
 
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
@@ -26,6 +21,11 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.common.ConnectionResult;
@@ -55,12 +55,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener{
-    private GoogleMap mMap;
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
     LocationRequest mLocationRequest;
-    private int REQUEST_CODE = 11;
     SupportMapFragment mapFragment;
     EditText mFullName, mFoodItem, mDescription, mPhone;
     Button mSubmitBtn, btnGallery;
@@ -71,25 +69,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     FirebaseStorage storage;
     StorageReference storageReference;
     ProgressBar progressBar;
-
-    Uri filePath= null;
+    Uri filePath = null;
     ImageView img;
-    String downloadURL="";
+    String downloadURL = "";
+    private GoogleMap mMap;
+    private final int REQUEST_CODE = 11;
+    double latitude, longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main1);
+        setContentView(R.layout.activity_main);
 
         mFullName = findViewById(R.id.donorname);
         mFoodItem = findViewById(R.id.fooditem);
         mPhone = findViewById(R.id.phone);
         mDescription = findViewById(R.id.description);
         mSubmitBtn = findViewById(R.id.submit);
-        textView= findViewById(R.id.back);
-        btnGallery= findViewById(R.id.btnGallery);
-        img= findViewById(R.id.picture_to_be_posted);
-        progressBar= findViewById(R.id.progressBar2);
+        textView = findViewById(R.id.back);
+        btnGallery = findViewById(R.id.btnGallery);
+        img = findViewById(R.id.picture_to_be_posted);
+        progressBar = findViewById(R.id.progressBar2);
+        //mMap= findViewById(R.id.google_map);
 
         btnGallery.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,22 +117,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-
         sharedPreferences = new AppSharedPreferences(this);
-
 
         // Retrieve the Model object from the intent extras
         Model model = (Model) getIntent().getSerializableExtra("editModel");
-        System.out.println("Model is: "+model);
-        if (model!=null){
+        System.out.println("Model is: " + model);
+        if (model != null) {
             mFullName.setText(model.name);
             mFoodItem.setText(model.quantity);
             mPhone.setText(model.price);
             mDescription.setText(model.description);
 
-            downloadURL= model.itemImg;
-            System.out.println("Img is: "+model.itemImg);
-            if (model.itemImg!=null){
+            //set map to the saved data location
+            latitude = model.latitude;
+            longitude = model.longitude;
+
+            downloadURL = model.itemImg;
+            System.out.println("Img is: " + model.itemImg);
+            if (model.itemImg != null) {
                 //getting picture
                 Glide.with(this).load(model.itemImg).into(img);
                 //hide add button
@@ -139,11 +142,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             //model needs editing
             mSubmitBtn.setText("Update Item");
-            //textView.setText("Edit Item");
         }
-        else{
+        else {
             mSubmitBtn.setText("Add Item");
-            //textView.setText("Add New Item");
         }
 
         fStore = FirebaseFirestore.getInstance();
@@ -166,6 +167,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         mMap.setMyLocationEnabled(true);
+
+        //during edit, apply previously stored location
+        if (latitude != 0.0 && longitude != 0.0) {
+            LatLng latLng = new LatLng(latitude, longitude);
+            mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(latLng).title("Selected Location"));
+            mLastLocation = new Location("");
+            mLastLocation.setLatitude(latitude);
+            mLastLocation.setLongitude(longitude);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+        }
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                mMap.clear(); // Clear existing markers
+                mMap.addMarker(new MarkerOptions().position(latLng).title("Selected Location"));
+                mLastLocation = new Location(""); // Create a new Location object
+                mLastLocation.setLatitude(latLng.latitude); // Set latitude of the selected location
+                mLastLocation.setLongitude(latLng.longitude); // Set longitude of the selected location
+            }
+        });
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -182,15 +205,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLastLocation = location;
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
-        //MarkerOptions markerOptions1 = new MarkerOptions().position(latLng).title("You are here");
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        //mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
-        //mMap.addMarker(markerOptions1).showInfoWindow();
-
-        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("You are here");
+        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Selected Location");
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
         mMap.addMarker(markerOptions).showInfoWindow();
-
 
         mSubmitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -201,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String description = mDescription.getText().toString().trim();
                 String phone = mPhone.getText().toString().trim();
 
-                String uID= sharedPreferences.getUserID();
+                String uID = sharedPreferences.getUserID();
 
                 if (TextUtils.isEmpty(fullname)) {
                     mFullName.setError("Name is required.");
@@ -216,12 +233,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
 
                 //new image selected
-                if (filePath!=null){
+                if (filePath != null) {
                     //first upload image to firebase get download URL
                     uploadImage(uID, fullname, fooditem, description, phone);
                 }
                 // no change in image: change details only
-                else{
+                else {
                     saveDetails(uID, fullname, fooditem, description, phone);
                 }
             }
@@ -230,7 +247,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void saveDetails(String uID, String fullname, String fooditem, String description, String phone) {
 
-        //DocumentReference documentReference = fStore.collection("donate").document(userID);
         CollectionReference collectionReference = fStore.collection("user data");
 
         GeoPoint geoPoint = new GeoPoint(mLastLocation.getLatitude(), mLastLocation.getLongitude());
@@ -242,10 +258,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         user.put("description", description);
         user.put("location", geoPoint);
         //associating user with each item list
-        user.put("userId",uID);
-        user.put("itemImg",downloadURL);
+        user.put("userId", uID);
+        user.put("itemImg", downloadURL);
 
-        if(mSubmitBtn.getText()=="Add Item"){
+        if (mSubmitBtn.getText() == "Add Item") {
             String uuid = UUID.randomUUID().toString(); // Generate a random UUID
             user.put("docId", uuid); // Set the generated UUID as the document ID
 
@@ -254,8 +270,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         public void onComplete(@NonNull Task<Void> task) {
                             Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Success!");
-                            //startActivity(new Intent(getApplicationContext(),MainActivity.class));
-                            Intent intent = new Intent(MainActivity.this, AllActivity.class);
+                            Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
                             enableSpinner(false);
@@ -269,8 +284,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             enableSpinner(false);
                         }
                     });
-        }
-        else{
+        } else {
             SharedPreferences sharedPreferences = getSharedPreferences("edit", MODE_PRIVATE);
 
             // Retrieve data from SharedPreferences
@@ -280,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         public void onComplete(@NonNull Task<Void> task) {
                             Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Success!");
-                            Intent intent = new Intent(MainActivity.this, AllActivity.class);
+                            Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
                             enableSpinner(false);
@@ -297,16 +311,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    //fix edit and updatee image and info null not null
     private void uploadImage(String uID, String fullname, String fooditem, String description, String phone) {
         if (filePath != null) {
-            // Code for showing progressDialog while uploading
-            /*ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("Uploading...");
-            progressDialog.show();*/
-
-            System.out.println(filePath);
-
             // Defining the child of storageReference
             StorageReference ref = storageReference.child(
                     "images/" + UUID.randomUUID().toString()
@@ -318,8 +324,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             // Image uploaded successfully
-                            // Dismiss dialog
-                           // progressDialog.dismiss();
                             Toast.makeText(
                                     MainActivity.this, "Image Uploaded!!", Toast.LENGTH_SHORT
                             ).show();
@@ -348,16 +352,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             enableSpinner(false);
                         }
                     });
-                    /*.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            // Progress Listener for loading percentage on the dialog box
-                            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-                            progressDialog.setMessage("Uploaded " + (int) progress + "%");
-                        }
-                    });*/
-        }
-        else {
+        } else {
             Toast.makeText(
                     MainActivity.this, "Please select a picture to proceed.", Toast.LENGTH_SHORT
             ).show();
@@ -376,7 +371,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (data != null) {
                     // img.setImageURI(data.getData());
                     filePath = data.getData();
-
                     try {
                         Bitmap bitmap = MediaStore.Images.Media.getBitmap(
                                 MainActivity.this.getContentResolver(), filePath
@@ -391,7 +385,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         mLocationRequest = new com.google.android.gms.location.LocationRequest();
@@ -404,13 +397,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
@@ -430,7 +423,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             progressBar.setVisibility(View.INVISIBLE);
         }
-
         mSubmitBtn.setEnabled(!enable);
     }
 }

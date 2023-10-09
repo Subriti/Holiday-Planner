@@ -1,5 +1,12 @@
 package com.example.planner;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,21 +15,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.database.core.Tag;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -31,53 +26,47 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AllActivity extends AppCompatActivity {
+public class DashboardActivity extends AppCompatActivity {
     FirebaseFirestore db;
-
     RecyclerView recyclerView;
     Adapter adapter;
     List<Model> modelList;
-
-    private ProgressBar progressBar;
     TextView currentUser, logout, noItem, username, useremail, userphone;
     AppSharedPreferences sharedPreferences;
     FloatingActionButton floatingActionButton;
+    private ProgressBar progressBar;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_all);
-        setContentView(R.layout.acitivity_dashboard);
+        setContentView(R.layout.activity_dashboard);
 
-        db =FirebaseFirestore.getInstance();
-        recyclerView=findViewById(R.id.rec);
+        db = FirebaseFirestore.getInstance();
+        recyclerView = findViewById(R.id.rec);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
 
         sharedPreferences = new AppSharedPreferences(this);
 
-        floatingActionButton=findViewById(R.id.fab);
+        floatingActionButton = findViewById(R.id.fab);
         progressBar = findViewById(R.id.progressBar);
-        currentUser= findViewById(R.id.currentUser);
-        logout= findViewById(R.id.logout);
-        noItem= findViewById(R.id.noItem);
-        username= findViewById(R.id.username);
-        useremail= findViewById(R.id.useremail);
-        userphone= findViewById(R.id.userphone);
+        currentUser = findViewById(R.id.currentUser);
+        logout = findViewById(R.id.logout);
+        noItem = findViewById(R.id.noItem);
+        username = findViewById(R.id.username);
+        useremail = findViewById(R.id.useremail);
+        userphone = findViewById(R.id.userphone);
 
         username.setText(sharedPreferences.getUsername());
-        useremail.setText("Email: "+sharedPreferences.getEmail());
-        userphone.setText("Phone: "+sharedPreferences.getUserPhone());
+        useremail.setText("Email: " + sharedPreferences.getEmail());
+        userphone.setText("Phone: " + sharedPreferences.getUserPhone());
 
-        //noItem.setVisibility(View.INVISIBLE);
-
-        //currentUser.setText(sharedPreferences.getUsername() + "'s Holiday Requirements");
         currentUser.setText("Requirements");
 
         drawerLayout = findViewById(R.id.drawer_layout);
         actionBarDrawerToggle = new ActionBarDrawerToggle(
-                this, drawerLayout, R.string.open , R.string.close);
+                this, drawerLayout, R.string.open, R.string.close);
 
         drawerLayout.addDrawerListener(actionBarDrawerToggle);
 
@@ -99,17 +88,10 @@ public class AllActivity extends AppCompatActivity {
             }
         });
 
-        // Set a click listener for the logout button in drawer layout
-        Button logoutButton = findViewById(R.id.logout_button);
-        logoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {logout();}
-        });
-
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(AllActivity.this, MainActivity.class));
+                startActivity(new Intent(DashboardActivity.this, MainActivity.class));
             }
         });
 
@@ -121,7 +103,7 @@ public class AllActivity extends AppCompatActivity {
         });
 
         modelList = new ArrayList<>();
-        adapter = new Adapter(getApplicationContext(),modelList);
+        adapter = new Adapter(getApplicationContext(), modelList);
         recyclerView.setAdapter(adapter);
 
         loadFirestoreData();
@@ -138,14 +120,14 @@ public class AllActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             int documentCount = task.getResult().size();
-                            System.out.println( "Number of documents: " + documentCount);
+                            System.out.println("Number of documents: " + documentCount);
 
                             modelList.clear();
 
                             for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()) {
                                 Model workmodel = documentSnapshot.toObject(Model.class);
                                 if (workmodel != null) {
-                                    System.out.println("Document content: " + workmodel.toString());
+                                    System.out.println("Document content: " + workmodel);
                                     if (workmodel.userId.equals(sharedPreferences.getUserID())) {
                                         modelList.add(workmodel);
                                     }
@@ -168,15 +150,6 @@ public class AllActivity extends AppCompatActivity {
                 });
     }
 
-    /*public void toggleSidebar() {
-        RelativeLayout sidebar = findViewById(R.id.sidebar);
-        if (sidebar.getVisibility() == View.VISIBLE) {
-            sidebar.setVisibility(View.GONE);
-        } else {
-            sidebar.setVisibility(View.VISIBLE);
-        }
-    }*/
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -191,13 +164,13 @@ public class AllActivity extends AppCompatActivity {
         }
     }
 
-    public void logout(){
+    public void logout() {
         sharedPreferences.setLoggedIn(false);
         sharedPreferences.setUserPhone("");
         sharedPreferences.setUsername("");
         sharedPreferences.setUserID("");
         sharedPreferences.setEmail("");
-        startActivity(new Intent(AllActivity.this, SplashScreen.class));
+        startActivity(new Intent(DashboardActivity.this, SplashScreen.class));
         finish();
     }
 }

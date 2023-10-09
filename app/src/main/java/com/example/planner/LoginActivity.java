@@ -1,8 +1,5 @@
 package com.example.planner;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -12,6 +9,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -25,11 +25,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class LoginActivity extends AppCompatActivity {
-    EditText mEmail,mPassword;
+    EditText mEmail, mPassword;
     Button mLoginBtn;
     FirebaseAuth fAuth;
     FirebaseDatabase database;
-
     ProgressBar loginSpinner;
 
     @Override
@@ -46,91 +45,64 @@ public class LoginActivity extends AppCompatActivity {
         AppSharedPreferences sharedPreferences = new AppSharedPreferences(this);
 
         FirebaseApp.initializeApp(LoginActivity.this);
-        fAuth=FirebaseAuth.getInstance();
-        database=FirebaseDatabase.getInstance();
-
-       /* if(fAuth.getCurrentUser() !=null){
-            Intent intent = new Intent(Login.this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }*/
-
+        fAuth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance();
 
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 enableSpinner(true);
                 String email = mEmail.getText().toString().trim();
-                String password= mPassword.getText().toString().trim();
+                String password = mPassword.getText().toString().trim();
 
-
-                if(TextUtils.isEmpty(email))
-                {
+                if (TextUtils.isEmpty(email)) {
                     mEmail.setError("Email is Required.");
                     enableSpinner(false);
                     return;
-                }else{
+                }
+                else {
                     if (!validEmail(email)) {
                         mEmail.setError("Valid-Email is Required.");
-                        Toast.makeText(LoginActivity.this,"Please enter a valid e-mail!",Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, "Please enter a valid e-mail!", Toast.LENGTH_LONG).show();
                         enableSpinner(false);
                     }
                 }
 
-                if(TextUtils.isEmpty(password))
-                {
+                if (TextUtils.isEmpty(password)) {
                     mPassword.setError("Password is Required.");
                     enableSpinner(false);
                     return;
                 }
 
-                if(password.length() < 6)
-                {
+                if (password.length() < 6) {
                     mPassword.setError("Password Must be >=6 Characters");
                     enableSpinner(false);
                     return;
                 }
 
-                //authenticate the user
-              /*  fAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                fAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            Toast.makeText(Login.this, "Logged in Successfully.", Toast.LENGTH_SHORT) .show();
-                            Intent intent = new Intent(Login.this, Donate.class);
-                         //   intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                        }else{
-                            Toast.makeText(Login.this, "Error! " + task.getException().getMessage(),Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });*/
-                fAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             String uid = task.getResult().getUser().getUid();
-
-                            //database.getReference().child("Usersregister").child(uid).child("usertype").addListenerForSingleValueEvent(new ValueEventListener() {
                             database.getReference().child("Usersregister").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     UserModel user = snapshot.getValue(UserModel.class);
                                     //int usertype = snapshot.getValue(Integer.class);
                                     int usertype = user.getUsertype();
-                                    if (usertype == 0){
+                                    if (usertype == 0) {
                                         sharedPreferences.setEmail(email);
                                         sharedPreferences.setUserID(uid);
-                                        //sharedPreferences.setUsername(fAuth.getCurrentUser().getDisplayName()); //null
                                         sharedPreferences.setUsername(user.getName());
                                         sharedPreferences.setUserPhone(user.getPhone());
                                         sharedPreferences.setLoggedIn(true);
 
-                                        Intent intent = new Intent(LoginActivity.this, AllActivity.class);
+                                        Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
                                         startActivity(intent);
                                         finish();
                                     }
-                                    if (usertype == 1){
+                                    if (usertype == 1) {
                                        /* Intent intent = new Intent(Login_Page.this, Admin_Page.class);
                                         startActivity(intent);
                                         finish();*/
@@ -156,16 +128,17 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+
     public boolean validEmail(String email) {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
+
     private void enableSpinner(boolean enable) {
         if (enable) {
             loginSpinner.setVisibility(View.VISIBLE);
         } else {
             loginSpinner.setVisibility(View.INVISIBLE);
         }
-
         mLoginBtn.setEnabled(!enable);
     }
 

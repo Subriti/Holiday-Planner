@@ -3,6 +3,7 @@ package com.example.planner;
 import static android.content.Context.MODE_PRIVATE;
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,19 +12,15 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -31,10 +28,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -58,16 +53,14 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     Context context;
     List<Model> modelList;
     Model model;
-    private FirebaseFirestore db;
-    private SharedPreferences sharedPreferences;
-    private Geocoder geocoder;
     FirebaseStorage storage;
     StorageReference storageReference;
-
-    private boolean isChecked;
-    Boolean expanded= false;
-
+    Boolean expanded = false;
     CollectionReference collectionReference;
+    private final FirebaseFirestore db;
+    private final SharedPreferences sharedPreferences;
+    private final Geocoder geocoder;
+    private boolean isChecked;
 
     public Adapter(Context context, List<Model> modelList) {
         this.context = context;
@@ -83,24 +76,21 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     @NonNull
     @Override
     public Adapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new Adapter.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.listwimg, parent, false));
-
+        return new Adapter.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull Adapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull Adapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         //expand approach
-        model= modelList.get(position);
+        model = modelList.get(position);
 
         GeoPoint geoPoint = modelList.get(position).getLocation();
         holder.name.setText(modelList.get(position).getName());
-        holder.quntity.setText("Qty:  "+modelList.get(position).getQuantity());
+        holder.quntity.setText("Qty:  " + modelList.get(position).getQuantity());
         holder.price.setText("Price:  ₹" + modelList.get(position).getPrice());
         holder.description.setText(modelList.get(position).getDescription());
         // Load the image into the imgItem ImageView using Glide
-        Glide.with(context)
-                .load(modelList.get(position).getItemImg())
-                .placeholder(R.drawable.addtocart) // Optional: Placeholder image while loading
+        Glide.with(context).load(modelList.get(position).getItemImg()).placeholder(R.drawable.addtocart) // Optional: Placeholder image while loading
                 .error(R.drawable.addtocart) // Optional: Image to display on error
                 .into(holder.imgItem);
 
@@ -110,9 +100,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
         });
 
-        isChecked= modelList.get(position).getIsPurchased();
+        isChecked = modelList.get(position).getIsPurchased();
 
-        checkPurchase(model,holder);
+        checkPurchase(model, holder);
 
         // Check if the item is expanded
         if (expanded) {
@@ -125,7 +115,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             holder.delete.setVisibility(View.VISIBLE);
             holder.share.setVisibility(View.VISIBLE);
             holder.arrow.setVisibility(View.INVISIBLE);
-
             holder.checkBox.setChecked(isChecked);
         } else {
             // Hide additional information
@@ -135,9 +124,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             holder.mapView.setVisibility(View.GONE);
             holder.edit.setVisibility(View.GONE);
             holder.delete.setVisibility(View.GONE);
-
             holder.share.setVisibility(View.GONE);
-
             holder.arrow.setVisibility(View.VISIBLE);
             holder.checkBox.setChecked(isChecked);
         }
@@ -145,27 +132,11 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         holder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*if (holder.checkBox.isChecked()) {
-                    isChecked=true;
-                    model.setIsPurchased(true);
-                    holder.isPurchased.setText("Purchased");
-                    holder.isPurchased.setBackgroundColor(Color.GREEN);
-                }
-                else{
-                    isChecked=false;
-                    model.setIsPurchased(false);
-                    holder.isPurchased.setText("Not Purchased");
-                    holder.isPurchased.setBackgroundColor(Color.RED);
-                }
-                editData();*/
-
                 isChecked = holder.checkBox.isChecked();
                 modelList.get(position).setIsPurchased(isChecked);
+
                 //editData(modelList.get(position), position);
-
-                //working atleast minmimum
                 editData(position);
-
                 //editData(model);
             }
         });
@@ -176,7 +147,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             public void onClick(View view) {
                 // Toggle the expanded state
                 model.setIsExpanded(!model.getIsExpanded());
-                expanded=model.getIsExpanded();
+                expanded = model.getIsExpanded();
                 notifyItemChanged(position);
             }
         });
@@ -192,13 +163,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 //Intent intent = new Intent(context, ViewAllActivity.class);
                 Intent intent = new Intent(context, MainActivity.class);
 
-                System.out.println(modelList.get(position).getName());
-                System.out.println(modelList.get(position).getDescription());
-                System.out.println(modelList.get(position).getQuantity());
-                System.out.println(modelList.get(position).getPrice());
-
                 //passing values to the edit Screen
-                Model newModel = new Model(modelList.get(position).getName(), modelList.get(position).getQuantity(), modelList.get(position).getPrice(), modelList.get(position).getDescription(), modelList.get(position).getItemImg());
+                Model newModel = new Model(modelList.get(position).getName(), modelList.get(position).getQuantity(), modelList.get(position).getPrice(), modelList.get(position).getDescription(), modelList.get(position).getItemImg(), modelList.get(position).location.getLatitude(), modelList.get(position).location.getLongitude());
                 intent.putExtra("editModel", newModel);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
@@ -210,30 +176,27 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             public void onClick(View v) {
                 String doc = modelList.get(position).getDocId();
 
-                db.collection("user data").whereEqualTo("docId", doc)
-                        .get()
-                        .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                db.collection("user data").whereEqualTo("docId", doc).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        WriteBatch batch = FirebaseFirestore.getInstance().batch();
+                        List<DocumentSnapshot> doc = queryDocumentSnapshots.getDocuments();
+                        for (DocumentSnapshot snapshot : doc) {
+                            batch.delete(snapshot.getReference());
+                        }
+                        batch.commit().addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                WriteBatch batch = FirebaseFirestore.getInstance().batch();
-                                List<DocumentSnapshot> doc = queryDocumentSnapshots.getDocuments();
-                                for (DocumentSnapshot snapshot : doc) {
-                                    batch.delete(snapshot.getReference());
-                                }
-                                batch.commit()
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void unused) {
-                                                modelList.remove(position);
-                                                Toast.makeText(context, "Deleted ", Toast.LENGTH_SHORT).show();
+                            public void onSuccess(Void unused) {
+                                modelList.remove(position);
+                                Toast.makeText(context, "Deleted ", Toast.LENGTH_SHORT).show();
 
-                                                Intent intent = new Intent(context, AllActivity.class);
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                context.startActivity(intent);
-                                            }
-                                        });
+                                Intent intent = new Intent(context, DashboardActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(intent);
                             }
                         });
+                    }
+                });
 
             }
         });
@@ -256,27 +219,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                 openWhatsApp(name, quantity, price, desc, placeName, itemImg);
             }
         });
-
-        /*holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), DetailActivity.class);
-                System.out.println(modelList.get(position).getName());
-                System.out.println(modelList.get(position).getDescription());
-                System.out.println(modelList.get(position).getQuantity());
-                System.out.println(modelList.get(position).getPrice());
-
-                //passing values to the edit Screen
-                Model newModel= new Model(modelList.get(position).getName(), modelList.get(position).getQuantity(), modelList.get(position).getPrice(), modelList.get(position).getDescription());
-                intent.putExtra("viewModel", newModel);
-                v.getContext().startActivity(intent);
-            }
-        });*/
     }
 
     private void openWhatsApp(String name, String quantity, String price, String desc, String location, String itemImg) {
         try {
-            //Uri uri = Uri.parse("https://api.whatsapp.com/send?phone=" + phoneNumber + "&text=" +"Project Name :- "+ nam );
             Uri uri = Uri.parse("https://api.whatsapp.com/send?text=" + "Item Name: " + name + "\n\nQuantity: " + quantity + "\n\nPrice: Rs." + price + "\n\nDescription: " + desc + "\n\nGeoPoint: " + location + "\n\nImage: " + itemImg);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -310,39 +256,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         return modelList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        MapView mapView;
-        TextView name, quntity, price, description, arrow, isPurchased;
-        ImageView edit, delete, share, imgItem;
-        CheckBox checkBox;
-
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            mapView = itemView.findViewById(R.id.google_map);
-            mapView.onCreate(null);
-            mapView.onResume();
-            name = itemView.findViewById(R.id.name);
-            quntity = itemView.findViewById(R.id.quntity);
-            price = itemView.findViewById(R.id.price);
-            description = itemView.findViewById(R.id.des);
-            edit = itemView.findViewById(R.id.edit);
-            delete = itemView.findViewById(R.id.delete);
-            share = itemView.findViewById(R.id.share);
-            imgItem= itemView.findViewById(R.id.imgItem);
-            arrow= itemView.findViewById(R.id.arrow);
-            isPurchased= itemView.findViewById(R.id.isPurchased);
-            checkBox= itemView.findViewById(R.id.checkbox);
-
-            description.setVisibility(View.GONE);
-            price.setVisibility(View.GONE);
-            quntity.setVisibility(View.GONE);
-            mapView.setVisibility(View.GONE);
-            edit.setVisibility(View.GONE);
-            delete.setVisibility(View.GONE);
-            share.setVisibility(View.GONE);
-        }
-    }
-
     public String encodeURL(String url) {
         try {
             return URLEncoder.encode(url, StandardCharsets.UTF_8.toString());
@@ -353,20 +266,18 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         }
     }
 
-    public void checkPurchase(Model model, ViewHolder holder){
-        if (model.getIsPurchased() && isChecked==true){
+    public void checkPurchase(Model model, ViewHolder holder) {
+        if (model.getIsPurchased() && isChecked) {
             holder.isPurchased.setText("Purchased");
             holder.isPurchased.setBackgroundColor(Color.GREEN);
             holder.checkBox.isChecked();
-        }
-        else {
+        } else {
             holder.isPurchased.setText("Not Purchased");
             holder.isPurchased.setBackgroundColor(Color.RED);
             holder.checkBox.setChecked(false);
         }
     }
 
-    // Inside editData() method:
     public void editData(Model model) {
         collectionReference = db.collection("user data");
         SharedPreferences sharedPreferences = context.getSharedPreferences("edit", MODE_PRIVATE);
@@ -387,37 +298,32 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         updatedData.put("isPurchased", model.isPurchased); // Updated purchase status
 
         // Add the new document to Firestore with a unique document ID
-        collectionReference.add(updatedData)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+        collectionReference.add(updatedData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                // New document added successfully, now delete the old one
+                collectionReference.document(doc).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        // New document added successfully, now delete the old one
-                        collectionReference.document(doc).delete()
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
-                                        notifyDataSetChanged(); // Refresh the RecyclerView
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(context, "Failed to delete old item", Toast.LENGTH_SHORT).show();
-                                        Log.e(TAG, "Error deleting old document", e);
-                                    }
-                                });
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
+                        notifyDataSetChanged(); // Refresh the RecyclerView
                     }
-                })
-                .addOnFailureListener(new OnFailureListener() {
+                }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context, "Failed to add updated item", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Error adding updated document", e);
+                        Toast.makeText(context, "Failed to delete old item", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Error deleting old document", e);
                     }
                 });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(context, "Failed to add updated item", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error adding updated document", e);
+            }
+        });
     }
-
 
     public void editData(Model model, int position) {
         collectionReference = db.collection("user data");
@@ -457,96 +363,42 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         notifyDataSetChanged();
 
         // Update the document in Firestore
-        collectionReference.document(doc).update(updates)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
+        collectionReference.document(doc).update(updates).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
 
-                        String doc = modelList.get(position).getDocId();
+                String doc = modelList.get(position).getDocId();
 
-                        db.collection("user data").whereEqualTo("docId", doc)
-                                .get()
-                                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                        WriteBatch batch = FirebaseFirestore.getInstance().batch();
-                                        List<DocumentSnapshot> doc = queryDocumentSnapshots.getDocuments();
-                                        for (DocumentSnapshot snapshot : doc) {
-                                            batch.delete(snapshot.getReference());
-                                        }
-                                        batch.commit()
-                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                    @Override
-                                                    public void onSuccess(Void unused) {
-                                                        modelList.remove(position);
-                                                        notifyDataSetChanged();
-                                                        //Toast.makeText(context, "Deleted old product item", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                });
-                                    }
-                                });
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
+                db.collection("user data").whereEqualTo("docId", doc).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context, "Failed to update item purchase details!", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Error updating document", e);
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        WriteBatch batch = FirebaseFirestore.getInstance().batch();
+                        List<DocumentSnapshot> doc = queryDocumentSnapshots.getDocuments();
+                        for (DocumentSnapshot snapshot : doc) {
+                            batch.delete(snapshot.getReference());
+                        }
+                        batch.commit().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                modelList.remove(position);
+                                notifyDataSetChanged();
+                                //Toast.makeText(context, "Deleted old product item", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(context, "Failed to update item purchase details!", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error updating document", e);
+            }
+        });
     }
 
-/*
-    // Inside editData() method:
-    public void editData(Model model) {
-        collectionReference = db.collection("user data");
-        SharedPreferences sharedPreferences = context.getSharedPreferences("edit", MODE_PRIVATE);
-
-        // Retrieve data from SharedPreferences
-        String doc = sharedPreferences.getString("docId", "");
-
-        Map<String, Object> user = new HashMap<>();
-        user.put("timestamp", FieldValue.serverTimestamp());
-        user.put("name", model.name);
-        user.put("quantity", model.quantity);
-        user.put("price", model.price);
-        user.put("description", model.description);
-        user.put("location", model.location);
-        user.put("userId", model.userId);
-        user.put("itemImg", model.itemImg);
-        user.put("isPurchased", model.isPurchased); // Use the isPurchased property from the model
-
-        *//*collectionReference.document(doc).update(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(context, "Failed to update item purchase details!", Toast.LENGTH_SHORT).show();
-                            Log.w(TAG, "Error updating document", task.getException());
-                        }
-                        }
-                });*//*
-
-        collectionReference.document(doc).update(user)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
-                        notifyDataSetChanged();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context, "Failed to update item purchase details!", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Error updating document", e);
-                    }
-                });
-    }*/
-
-    public void editData(int position){
+    public void editData(int position) {
         collectionReference = db.collection("user data");
         SharedPreferences sharedPreferences = context.getSharedPreferences("edit", MODE_PRIVATE);
 
@@ -561,47 +413,62 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         user.put("description", model.description);
         user.put("location", model.location);
         //associating user with each item list
-        user.put("userId",model.userId);
-        user.put("itemImg",model.itemImg);
-        user.put("isPurchased",isChecked);
+        user.put("userId", model.userId);
+        user.put("itemImg", model.itemImg);
+        user.put("isPurchased", isChecked);
 
-        /*collectionReference.document(doc).update(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
-                        System.out.println(model);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context, "Couldn't register the purchase!", Toast.LENGTH_SHORT).show();
-                        Log.w(TAG, "Error!", e);
-                    }
-                });*/
+        try{
+            // Update the document in Firestore
+            collectionReference.document(doc).update(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // Update the model in the list
+                    modelList.get(position).setIsPurchased(isChecked); // Assuming you want to mark it as purchased
+                    notifyDataSetChanged(); // Refresh the RecyclerView
+                    Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(context, "Failed to update item purchase details!", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error updating document", e);
+                }
+            });
+        }catch (Exception e){
+            Toast.makeText(context, "Something went wrong!", Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        // Update the document in Firestore
-        collectionReference.document(doc).update(user)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // Update the model in the list
-                        if (isChecked){
-                            modelList.get(position).setIsPurchased(true); // Assuming you want to mark it as purchased
-                        }else{
-                            modelList.get(position).setIsPurchased(false); // Assuming you want to mark it as not purchased
-                        }
-                        notifyDataSetChanged(); // Refresh the RecyclerView
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        MapView mapView;
+        TextView name, quntity, price, description, arrow, isPurchased;
+        ImageView edit, delete, share, imgItem;
+        CheckBox checkBox;
 
-                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context, "Failed to update item purchase details!", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Error updating document", e);
-                    }
-                });
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mapView = itemView.findViewById(R.id.google_map);
+            mapView.onCreate(null);
+            mapView.onResume();
+            name = itemView.findViewById(R.id.name);
+            quntity = itemView.findViewById(R.id.quntity);
+            price = itemView.findViewById(R.id.price);
+            description = itemView.findViewById(R.id.des);
+            edit = itemView.findViewById(R.id.edit);
+            delete = itemView.findViewById(R.id.delete);
+            share = itemView.findViewById(R.id.share);
+            imgItem = itemView.findViewById(R.id.imgItem);
+            arrow = itemView.findViewById(R.id.arrow);
+            isPurchased = itemView.findViewById(R.id.isPurchased);
+            checkBox = itemView.findViewById(R.id.checkbox);
+
+            description.setVisibility(View.GONE);
+            price.setVisibility(View.GONE);
+            quntity.setVisibility(View.GONE);
+            mapView.setVisibility(View.GONE);
+            edit.setVisibility(View.GONE);
+            delete.setVisibility(View.GONE);
+            share.setVisibility(View.GONE);
+        }
     }
 }

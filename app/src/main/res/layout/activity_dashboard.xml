@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:id="@+id/drawer_layout"
     android:background="@android:color/white"
-    tools:context=".AllActivity">
+    tools:context=".DashboardActivity">
 
     <!-- Sidebar -->
     <RelativeLayout

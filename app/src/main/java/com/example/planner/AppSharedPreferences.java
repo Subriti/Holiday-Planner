@@ -5,13 +5,11 @@ import android.content.SharedPreferences;
 public class AppSharedPreferences {
 
     private static final String PREF_NAME = "MyAppPreferences";
-
     private static final String KEY_ID= "userid";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_PHONE = "phonenumber";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
-
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private Context context;
