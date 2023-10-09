@@ -19,12 +19,12 @@ public class Model implements Serializable {
     // Flag to indicate whether the item is expanded
     private boolean isExpanded;
 
-    private boolean isPurchased;
+    boolean isPurchased= false;
 
     public Model() {
     }
 
-    public Model(String userId, String description, String docId, String quantity, GeoPoint location, String name, String price, Timestamp timestamp, String itemImg) {
+    public Model(String userId, String description, String docId, String quantity, GeoPoint location, String name, String price, Timestamp timestamp, String itemImg, Boolean isPurchased) {
         this.userId=userId;
         this.description = description;
         this.docId = docId;
@@ -34,6 +34,7 @@ public class Model implements Serializable {
         this.price = price;
         this.timestamp = timestamp;
         this.itemImg= itemImg;
+        this.isPurchased= isPurchased;
     }
 
     public Model(String userId, String description, String docId, String quantity, GeoPoint location, String name, String price, Timestamp timestamp) {

@@ -1,15 +1,22 @@
 package com.example.planner;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -32,13 +39,17 @@ public class AllActivity extends AppCompatActivity {
     List<Model> modelList;
 
     private ProgressBar progressBar;
-    TextView currentUser, logout, noItem;
+    TextView currentUser, logout, noItem, username, useremail, userphone;
     AppSharedPreferences sharedPreferences;
     FloatingActionButton floatingActionButton;
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle actionBarDrawerToggle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_all);
+        //setContentView(R.layout.activity_all);
+        setContentView(R.layout.acitivity_dashboard);
 
         db =FirebaseFirestore.getInstance();
         recyclerView=findViewById(R.id.rec);
@@ -51,11 +62,49 @@ public class AllActivity extends AppCompatActivity {
         currentUser= findViewById(R.id.currentUser);
         logout= findViewById(R.id.logout);
         noItem= findViewById(R.id.noItem);
+        username= findViewById(R.id.username);
+        useremail= findViewById(R.id.useremail);
+        userphone= findViewById(R.id.userphone);
+
+        username.setText(sharedPreferences.getUsername());
+        useremail.setText("Email: "+sharedPreferences.getEmail());
+        userphone.setText("Phone: "+sharedPreferences.getUserPhone());
 
         //noItem.setVisibility(View.INVISIBLE);
 
         //currentUser.setText(sharedPreferences.getUsername() + "'s Holiday Requirements");
         currentUser.setText("Requirements");
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(
+                this, drawerLayout, R.string.open , R.string.close);
+
+        drawerLayout.addDrawerListener(actionBarDrawerToggle);
+
+        // Set a click listener for the menu button
+        ImageView menuButton = findViewById(R.id.menu_button);
+        menuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleSidebar();
+            }
+        });
+
+        // Set a click listener for the close button in the sidebar
+        ImageView closeSidebarButton = findViewById(R.id.close_sidebar_button);
+        closeSidebarButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleSidebar();
+            }
+        });
+
+        // Set a click listener for the logout button in drawer layout
+        Button logoutButton = findViewById(R.id.logout_button);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {logout();}
+        });
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,13 +116,7 @@ public class AllActivity extends AppCompatActivity {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sharedPreferences.setLoggedIn(false);
-                sharedPreferences.setUserPhone("");
-                sharedPreferences.setUsername("");
-                sharedPreferences.setUserID("");
-                sharedPreferences.setEmail("");
-                startActivity(new Intent(AllActivity.this, SplashScreen.class));
-                finish();
+                logout();
             }
         });
 
@@ -123,5 +166,38 @@ public class AllActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    /*public void toggleSidebar() {
+        RelativeLayout sidebar = findViewById(R.id.sidebar);
+        if (sidebar.getVisibility() == View.VISIBLE) {
+            sidebar.setVisibility(View.GONE);
+        } else {
+            sidebar.setVisibility(View.VISIBLE);
+        }
+    }*/
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        actionBarDrawerToggle.syncState();
+    }
+
+    private void toggleSidebar() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            drawerLayout.openDrawer(GravityCompat.START);
+        }
+    }
+
+    public void logout(){
+        sharedPreferences.setLoggedIn(false);
+        sharedPreferences.setUserPhone("");
+        sharedPreferences.setUsername("");
+        sharedPreferences.setUserID("");
+        sharedPreferences.setEmail("");
+        startActivity(new Intent(AllActivity.this, SplashScreen.class));
+        finish();
     }
 }

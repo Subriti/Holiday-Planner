@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     int galleryRequestCode = 1000;
     FirebaseStorage storage;
     StorageReference storageReference;
+    ProgressBar progressBar;
 
     Uri filePath= null;
     ImageView img;
@@ -87,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         textView= findViewById(R.id.back);
         btnGallery= findViewById(R.id.btnGallery);
         img= findViewById(R.id.picture_to_be_posted);
+        progressBar= findViewById(R.id.progressBar2);
 
         btnGallery.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -192,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mSubmitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                enableSpinner(true);
                 String fullname = mFullName.getText().toString().trim();
                 String fooditem = mFoodItem.getText().toString().trim();
                 String description = mDescription.getText().toString().trim();
@@ -201,11 +205,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 if (TextUtils.isEmpty(fullname)) {
                     mFullName.setError("Name is required.");
+                    enableSpinner(false);
                     return;
                 }
 
                 if (TextUtils.isEmpty(fooditem)) {
                     mFoodItem.setError("Quantity is required.");
+                    enableSpinner(false);
                     return;
                 }
 
@@ -252,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             Intent intent = new Intent(MainActivity.this, AllActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
+                            enableSpinner(false);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -259,6 +266,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         public void onFailure(@NonNull Exception e) {
                             Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
                             Log.w(TAG, "Error!", e);
+                            enableSpinner(false);
                         }
                     });
         }
@@ -275,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             Intent intent = new Intent(MainActivity.this, AllActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
+                            enableSpinner(false);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -282,6 +291,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         public void onFailure(@NonNull Exception e) {
                             Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
                             Log.w(TAG, "Error!", e);
+                            enableSpinner(false);
                         }
                     });
         }
@@ -335,6 +345,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             Toast.makeText(
                                     MainActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT
                             ).show();
+                            enableSpinner(false);
                         }
                     });
                     /*.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -350,6 +361,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Toast.makeText(
                     MainActivity.this, "Please select a picture to proceed.", Toast.LENGTH_SHORT
             ).show();
+            enableSpinner(false);
         }
     }
 
@@ -410,5 +422,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void enableSpinner(boolean enable) {
+        if (enable) {
+            progressBar.setVisibility(View.VISIBLE);
+        } else {
+            progressBar.setVisibility(View.INVISIBLE);
+        }
+
+        mSubmitBtn.setEnabled(!enable);
     }
 }

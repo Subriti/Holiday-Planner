@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -35,6 +36,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -59,12 +61,13 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
     private FirebaseFirestore db;
     private SharedPreferences sharedPreferences;
     private Geocoder geocoder;
-    FirebaseFirestore fStore;
     FirebaseStorage storage;
     StorageReference storageReference;
 
     private boolean isChecked;
     Boolean expanded= false;
+
+    CollectionReference collectionReference;
 
     public Adapter(Context context, List<Model> modelList) {
         this.context = context;
@@ -72,6 +75,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         this.sharedPreferences = context.getSharedPreferences("edit", MODE_PRIVATE);
         db = FirebaseFirestore.getInstance();
         geocoder = new Geocoder(context);
+
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
     }
 
     @NonNull
@@ -104,9 +110,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
         });
 
-        //isChecked= modelList.get(position).getIsPurchased();
+        isChecked= modelList.get(position).getIsPurchased();
 
-        //checkPurchase(model,holder);
+        checkPurchase(model,holder);
 
         // Check if the item is expanded
         if (expanded) {
@@ -120,7 +126,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             holder.share.setVisibility(View.VISIBLE);
             holder.arrow.setVisibility(View.INVISIBLE);
 
-            //holder.checkBox.setChecked(isChecked);
+            holder.checkBox.setChecked(isChecked);
         } else {
             // Hide additional information
             holder.description.setVisibility(View.GONE);
@@ -133,13 +139,13 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
             holder.share.setVisibility(View.GONE);
 
             holder.arrow.setVisibility(View.VISIBLE);
-            //holder.checkBox.setChecked(isChecked);
+            holder.checkBox.setChecked(isChecked);
         }
 
-        /*holder.checkBox.setOnClickListener(new View.OnClickListener() {
+        holder.checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (holder.checkBox.isChecked()) {
+                /*if (holder.checkBox.isChecked()) {
                     isChecked=true;
                     model.setIsPurchased(true);
                     holder.isPurchased.setText("Purchased");
@@ -151,9 +157,18 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                     holder.isPurchased.setText("Not Purchased");
                     holder.isPurchased.setBackgroundColor(Color.RED);
                 }
-                editData();
+                editData();*/
+
+                isChecked = holder.checkBox.isChecked();
+                modelList.get(position).setIsPurchased(isChecked);
+                //editData(modelList.get(position), position);
+
+                //working atleast minmimum
+                editData(position);
+
+                //editData(model);
             }
-        });*/
+        });
 
         // Set click listener to expand/collapse the item
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -299,7 +314,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         MapView mapView;
         TextView name, quntity, price, description, arrow, isPurchased;
         ImageView edit, delete, share, imgItem;
-
         CheckBox checkBox;
 
         public ViewHolder(@NonNull View itemView) {
@@ -352,16 +366,192 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         }
     }
 
-    public void editData(){
+    // Inside editData() method:
+    public void editData(Model model) {
+        collectionReference = db.collection("user data");
         SharedPreferences sharedPreferences = context.getSharedPreferences("edit", MODE_PRIVATE);
-
-        fStore = FirebaseFirestore.getInstance();
-        storage = FirebaseStorage.getInstance();
-        storageReference = storage.getReference();
 
         // Retrieve data from SharedPreferences
         String doc = sharedPreferences.getString("docId", "");
-        CollectionReference collectionReference = fStore.collection("user data");
+
+        // Create a new document with the updated purchase status
+        Map<String, Object> updatedData = new HashMap<>();
+        updatedData.put("timestamp", FieldValue.serverTimestamp());
+        updatedData.put("name", model.name);
+        updatedData.put("quantity", model.quantity);
+        updatedData.put("price", model.price);
+        updatedData.put("description", model.description);
+        updatedData.put("location", model.location);
+        updatedData.put("userId", model.userId);
+        updatedData.put("itemImg", model.itemImg);
+        updatedData.put("isPurchased", model.isPurchased); // Updated purchase status
+
+        // Add the new document to Firestore with a unique document ID
+        collectionReference.add(updatedData)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        // New document added successfully, now delete the old one
+                        collectionReference.document(doc).delete()
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
+                                        notifyDataSetChanged(); // Refresh the RecyclerView
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(context, "Failed to delete old item", Toast.LENGTH_SHORT).show();
+                                        Log.e(TAG, "Error deleting old document", e);
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(context, "Failed to add updated item", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Error adding updated document", e);
+                    }
+                });
+    }
+
+
+    public void editData(Model model, int position) {
+        collectionReference = db.collection("user data");
+        SharedPreferences sharedPreferences = context.getSharedPreferences("edit", MODE_PRIVATE);
+
+        // Retrieve data from SharedPreferences
+        String doc = sharedPreferences.getString("docId", "");
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("timestamp", FieldValue.serverTimestamp());
+        updates.put("name", model.name);
+        updates.put("quantity", model.quantity);
+        updates.put("price", model.price);
+        updates.put("description", model.description);
+        updates.put("location", model.location);
+        updates.put("userId", model.userId);
+        updates.put("itemImg", model.itemImg);
+        updates.put("isPurchased", model.isPurchased); // Use the isPurchased property from the model
+
+        // Update the item in the modelList
+        for (int i = 0; i < modelList.size(); i++) {
+            if (modelList.get(i).getDocId().equals(doc)) {
+                // Update the properties of the item in the list
+                modelList.get(i).setName(model.name);
+                modelList.get(i).setQuantity(model.quantity);
+                modelList.get(i).setPrice(model.price);
+                modelList.get(i).setDescription(model.description);
+                modelList.get(i).setLocation(model.location);
+                modelList.get(i).setUserId(model.userId);
+                modelList.get(i).setItemImg(model.itemImg);
+                modelList.get(i).setIsPurchased(model.isPurchased);
+                break; // Exit the loop once the item is found and updated
+            }
+        }
+
+        // Notify the adapter of the data change
+        notifyDataSetChanged();
+
+        // Update the document in Firestore
+        collectionReference.document(doc).update(updates)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
+
+                        String doc = modelList.get(position).getDocId();
+
+                        db.collection("user data").whereEqualTo("docId", doc)
+                                .get()
+                                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                        WriteBatch batch = FirebaseFirestore.getInstance().batch();
+                                        List<DocumentSnapshot> doc = queryDocumentSnapshots.getDocuments();
+                                        for (DocumentSnapshot snapshot : doc) {
+                                            batch.delete(snapshot.getReference());
+                                        }
+                                        batch.commit()
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void unused) {
+                                                        modelList.remove(position);
+                                                        notifyDataSetChanged();
+                                                        //Toast.makeText(context, "Deleted old product item", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(context, "Failed to update item purchase details!", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Error updating document", e);
+                    }
+                });
+    }
+
+/*
+    // Inside editData() method:
+    public void editData(Model model) {
+        collectionReference = db.collection("user data");
+        SharedPreferences sharedPreferences = context.getSharedPreferences("edit", MODE_PRIVATE);
+
+        // Retrieve data from SharedPreferences
+        String doc = sharedPreferences.getString("docId", "");
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("timestamp", FieldValue.serverTimestamp());
+        user.put("name", model.name);
+        user.put("quantity", model.quantity);
+        user.put("price", model.price);
+        user.put("description", model.description);
+        user.put("location", model.location);
+        user.put("userId", model.userId);
+        user.put("itemImg", model.itemImg);
+        user.put("isPurchased", model.isPurchased); // Use the isPurchased property from the model
+
+        *//*collectionReference.document(doc).update(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(context, "Failed to update item purchase details!", Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "Error updating document", task.getException());
+                        }
+                        }
+                });*//*
+
+        collectionReference.document(doc).update(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
+                        notifyDataSetChanged();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(context, "Failed to update item purchase details!", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Error updating document", e);
+                    }
+                });
+    }*/
+
+    public void editData(int position){
+        collectionReference = db.collection("user data");
+        SharedPreferences sharedPreferences = context.getSharedPreferences("edit", MODE_PRIVATE);
+
+        // Retrieve data from SharedPreferences
+        String doc = sharedPreferences.getString("docId", "");
 
         Map<String, Object> user = new HashMap<>();
         user.put("timestamp", FieldValue.serverTimestamp());
@@ -375,10 +565,11 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         user.put("itemImg",model.itemImg);
         user.put("isPurchased",isChecked);
 
-        collectionReference.document(doc).update(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+        /*collectionReference.document(doc).update(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-
+                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
+                        System.out.println(model);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -386,6 +577,30 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
                     public void onFailure(@NonNull Exception e) {
                         Toast.makeText(context, "Couldn't register the purchase!", Toast.LENGTH_SHORT).show();
                         Log.w(TAG, "Error!", e);
+                    }
+                });*/
+
+        // Update the document in Firestore
+        collectionReference.document(doc).update(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Update the model in the list
+                        if (isChecked){
+                            modelList.get(position).setIsPurchased(true); // Assuming you want to mark it as purchased
+                        }else{
+                            modelList.get(position).setIsPurchased(false); // Assuming you want to mark it as not purchased
+                        }
+                        notifyDataSetChanged(); // Refresh the RecyclerView
+
+                        Toast.makeText(context, "Item purchase details updated!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(context, "Failed to update item purchase details!", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Error updating document", e);
                     }
                 });
     }
