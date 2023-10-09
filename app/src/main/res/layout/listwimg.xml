@@ -11,6 +11,30 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
 
+    <TextView
+        android:id="@+id/isPurchased"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_margin="10dp"
+        android:background="#4CAF50"
+        android:elevation="4dp"
+        android:fadingEdge="horizontal"
+        android:padding="5dp"
+        android:shadowRadius="2"
+        android:text="Purchased"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/arrow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="135dp"
+        app:drawableBottomCompat="@drawable/downarroww" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,24 +46,42 @@
             android:id="@+id/imgItem"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_gravity="center"
+            android:layout_gravity="start"
             android:layout_marginBottom="4dp"
             android:scaleType="centerCrop"
             android:src="@drawable/addtocart" />
 
-        <!-- Item Name -->
-        <TextView
-            android:id="@+id/name"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:fontFamily="@font/opensans_light"
-            android:text="Task Name"
-            android:textColor="#03A9F4"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:gravity="start|center_vertical"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:onClick="onCheckBoxClick"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|start"
+                android:fontFamily="@font/opensans_light"
+                android:text="Task Name"
+                android:textColor="#03A9F4"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
         <!-- Item Description -->
+
         <TextView
             android:id="@+id/des"
             android:layout_width="wrap_content"

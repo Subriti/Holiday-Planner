@@ -16,6 +16,11 @@ public class Model implements Serializable {
     String userId;
     String itemImg;
 
+    // Flag to indicate whether the item is expanded
+    private boolean isExpanded;
+
+    private boolean isPurchased;
+
     public Model() {
     }
 
@@ -118,4 +123,10 @@ public class Model implements Serializable {
     public void setItemImg(String itemImg) {
         this.itemImg = itemImg;
     }
+
+    public Boolean getIsExpanded(){return isExpanded;}
+    public void setIsExpanded(Boolean value){this.isExpanded= value;}
+
+    public Boolean getIsPurchased(){return isPurchased;}
+    public void setIsPurchased(Boolean value){this.isPurchased= value;}
 }

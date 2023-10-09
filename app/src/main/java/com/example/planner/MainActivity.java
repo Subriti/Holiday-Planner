@@ -127,12 +127,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mDescription.setText(model.description);
 
             downloadURL= model.itemImg;
-            //getting picture
-            Glide.with(this).load(model.itemImg).into(img);
-
-            //hide add button
-            btnGallery.setVisibility(View.INVISIBLE);
-
+            System.out.println("Img is: "+model.itemImg);
+            if (model.itemImg!=null){
+                //getting picture
+                Glide.with(this).load(model.itemImg).into(img);
+                //hide add button
+                btnGallery.setVisibility(View.INVISIBLE);
+            }
             //model needs editing
             mSubmitBtn.setText("Update Item");
             //textView.setText("Edit Item");
@@ -238,9 +239,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         user.put("userId",uID);
         user.put("itemImg",downloadURL);
 
-        if(mSubmitBtn.getText()=="Submit"){
-            String uuid = UUID.randomUUID().toString();
-            user.put("docId",uuid);
+        if(mSubmitBtn.getText()=="Add Item"){
+            String uuid = UUID.randomUUID().toString(); // Generate a random UUID
+            user.put("docId", uuid); // Set the generated UUID as the document ID
+
             collectionReference.document(uuid).set(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
