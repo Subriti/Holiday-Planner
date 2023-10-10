@@ -284,15 +284,17 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         // Generate a random UUID for the purchased item
         String purchasedUuid = UUID.randomUUID().toString();
 
+        Model newModel = modelList.get(position);
+
         Map<String, Object> purchasedItem = new HashMap<>();
         purchasedItem.put("timestamp", FieldValue.serverTimestamp());
-        purchasedItem.put("name", model.name);
-        purchasedItem.put("quantity", model.quantity);
-        purchasedItem.put("price", model.price);
-        purchasedItem.put("description", model.description);
-        purchasedItem.put("location", model.location);
-        purchasedItem.put("userId", model.userId);
-        purchasedItem.put("itemImg", model.itemImg);
+        purchasedItem.put("name", newModel.name);
+        purchasedItem.put("quantity", newModel.quantity);
+        purchasedItem.put("price", newModel.price);
+        purchasedItem.put("description", newModel.description);
+        purchasedItem.put("location", newModel.location);
+        purchasedItem.put("userId", newModel.userId);
+        purchasedItem.put("itemImg", newModel.itemImg);
         purchasedItem.put("isPurchased", isChecked);
         purchasedItem.put("docId", purchasedUuid);
 
