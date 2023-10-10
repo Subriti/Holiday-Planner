@@ -14,10 +14,12 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -31,12 +33,13 @@ public class DashboardActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     Adapter adapter;
     List<Model> modelList;
-    TextView currentUser, logout, noItem, username, useremail, userphone;
+    TextView currentUser, logout, noItem, username, useremail, userphone, purchasedList;
     AppSharedPreferences sharedPreferences;
     FloatingActionButton floatingActionButton;
     private ProgressBar progressBar;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,7 @@ public class DashboardActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         currentUser = findViewById(R.id.currentUser);
         logout = findViewById(R.id.logout);
+        purchasedList= findViewById(R.id.purchasedList);
         noItem = findViewById(R.id.noItem);
         username = findViewById(R.id.username);
         useremail = findViewById(R.id.useremail);
@@ -63,6 +67,35 @@ public class DashboardActivity extends AppCompatActivity {
         userphone.setText("Phone: " + sharedPreferences.getUserPhone());
 
         currentUser.setText("Requirements");
+
+        modelList = new ArrayList<>();
+        adapter = new Adapter(getApplicationContext(), modelList);
+        recyclerView.setAdapter(adapter);
+
+        // Initialize the SwipeRefreshLayout
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+
+        // Set the colors for the refresh animation
+        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+        // Set a listener for the refresh action
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // This is where you can perform your data refresh operation
+                // For example, you can reload your RecyclerView data here
+                loadFirestoreData();
+
+                // After the refresh is done, call setRefreshing(false) to stop the refresh animation
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        // Load initial data
+        loadFirestoreData();
 
         drawerLayout = findViewById(R.id.drawer_layout);
         actionBarDrawerToggle = new ActionBarDrawerToggle(
@@ -102,11 +135,12 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
-        modelList = new ArrayList<>();
-        adapter = new Adapter(getApplicationContext(), modelList);
-        recyclerView.setAdapter(adapter);
-
-        loadFirestoreData();
+        purchasedList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(DashboardActivity.this, PurchasedActivity.class));
+            }
+        });
     }
 
     private void loadFirestoreData() {
@@ -165,6 +199,9 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     public void logout() {
+        // Perform logout actions here, such as clearing user data, session, etc.
+        FirebaseAuth.getInstance().signOut();
+
         sharedPreferences.setLoggedIn(false);
         sharedPreferences.setUserPhone("");
         sharedPreferences.setUsername("");

@@ -115,6 +115,12 @@
         </LinearLayout>
     </RelativeLayout>
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
     <!-- Content Layout -->
     <RelativeLayout
         android:id="@+id/relativeLayout"
@@ -159,6 +165,17 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/purchasedList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="16dp"
+                android:clickable="true"
+                android:drawableStart="@drawable/baseline_shopping_cart_24"
+                app:layout_constraintEnd_toStartOf="@id/logout"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
@@ -210,10 +227,10 @@
                 android:textStyle="bold"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView4" />
+                app:layout_constraintTop_toBottomOf="@+id/purchaseBack" />
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/purchaseBack"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -239,4 +256,5 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </RelativeLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.drawerlayout.widget.DrawerLayout>
