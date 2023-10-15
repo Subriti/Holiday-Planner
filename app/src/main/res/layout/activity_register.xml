@@ -36,17 +36,15 @@
             android:id="@+id/nameError"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:textColorHint="@color/white"
-            app:hintAnimationEnabled="true"
-            app:passwordToggleTint="@color/white">
+            app:hintAnimationEnabled="true">
 
             <EditText
                 android:id="@+id/rrname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@color/darkGrey"
+                android:background="@drawable/edit_text_border_selector"
                 android:fontFamily="sans-serif"
                 android:hint="Enter Name"
                 android:importantForAutofill="no"
@@ -54,7 +52,7 @@
                 android:maxLines="1"
                 android:singleLine="true"
                 android:textColor="@color/white"
-                android:textColorHint="@color/black"
+                android:textColorHint="@color/white"
                 android:textSize="16sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -63,17 +61,15 @@
             android:id="@+id/emailError"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:textColorHint="@color/white"
-            app:hintAnimationEnabled="true"
-            app:passwordToggleTint="@color/white">
+            app:hintAnimationEnabled="true">
 
             <EditText
                 android:id="@+id/rremail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@color/darkGrey"
+                android:background="@drawable/edit_text_border_selector"
                 android:fontFamily="sans-serif"
                 android:hint="Enter Email"
                 android:importantForAutofill="no"
@@ -81,7 +77,7 @@
                 android:maxLines="1"
                 android:singleLine="true"
                 android:textColor="@color/white"
-                android:textColorHint="@color/black"
+                android:textColorHint="@color/white"
                 android:textSize="16sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -90,22 +86,20 @@
             android:id="@+id/phoneError"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:textColorHint="@color/white"
-            app:hintAnimationEnabled="true"
-            app:passwordToggleTint="@color/white">
+            app:hintAnimationEnabled="true">
 
             <EditText
                 android:id="@+id/rrphone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@color/darkGrey"
+                android:background="@drawable/edit_text_border_selector"
                 android:fontFamily="sans-serif"
                 android:hint="Enter Phone Number"
                 android:importantForAutofill="no"
                 android:inputType="phone"
-                android:maxLength="13"
+                android:maxLength="10"
                 android:maxLines="1"
                 android:singleLine="true"
                 android:textColor="@color/white"
@@ -118,7 +112,7 @@
             android:id="@+id/passError"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:textColorHint="@color/white"
             app:hintAnimationEnabled="true"
             app:passwordToggleEnabled="true"
@@ -128,8 +122,7 @@
                 android:id="@+id/rrpassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="@color/darkGrey"
+                android:background="@drawable/edit_text_border_selector"
                 android:fontFamily="sans-serif"
                 android:hint="Enter Password"
                 android:importantForAutofill="no"
@@ -137,7 +130,7 @@
                 android:maxLines="1"
                 android:singleLine="true"
                 android:textColor="@color/white"
-                android:textColorHint="@color/black"
+                android:textColorHint="@color/white"
                 android:textSize="16sp" />
 
         </com.google.android.material.textfield.TextInputLayout>

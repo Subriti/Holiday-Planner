@@ -47,7 +47,7 @@
                 android:id="@+id/emailError"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="16dp"
                 android:textColorHint="@color/white"
                 app:hintAnimationEnabled="true">
 
@@ -55,8 +55,7 @@
                     android:id="@+id/remail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="@color/darkGrey"
+                    android:background="@drawable/edit_text_border_selector"
                     android:drawableStart="@drawable/baseline_person_outline_24"
                     android:drawablePadding="10dp"
                     android:fontFamily="sans-serif"
@@ -84,8 +83,7 @@
                     android:id="@+id/rpassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="@color/darkGrey"
+                    android:background="@drawable/edit_text_border_selector"
                     android:drawableStart="@drawable/baseline_lock_24"
                     android:drawablePadding="10dp"
                     android:fontFamily="sans-serif"

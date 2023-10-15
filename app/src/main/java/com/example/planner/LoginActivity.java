@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseAuth fAuth;
     FirebaseDatabase database;
     ProgressBar loginSpinner;
+    TextInputLayout emailError, passError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +39,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         mEmail = findViewById(R.id.remail);
         mPassword = findViewById(R.id.rpassword);
+        emailError = findViewById(R.id.emailError);
+        passError = findViewById(R.id.passError);
         mLoginBtn = findViewById(R.id.rlogin);
 
         loginSpinner = findViewById(R.id.loginprogress);
@@ -56,28 +60,28 @@ public class LoginActivity extends AppCompatActivity {
                 String password = mPassword.getText().toString().trim();
 
                 if (TextUtils.isEmpty(email)) {
-                    mEmail.setError("Email is Required.");
+                    emailError.setError("Email is Required");
                     enableSpinner(false);
                     return;
-                }
-                else {
-                    if (!validEmail(email)) {
-                        mEmail.setError("Valid-Email is Required.");
-                        Toast.makeText(LoginActivity.this, "Please enter a valid e-mail!", Toast.LENGTH_LONG).show();
-                        enableSpinner(false);
-                    }
+                } else if (!validEmail(email)) {
+                    emailError.setError("Valid-Email is Required.");
+                    Toast.makeText(LoginActivity.this, "Please enter a valid e-mail!", Toast.LENGTH_LONG).show();
+                    enableSpinner(false);
+                    return;
+                } else {
+                    emailError.setError(null);
                 }
 
                 if (TextUtils.isEmpty(password)) {
-                    mPassword.setError("Password is Required.");
+                    passError.setError("Password is Required");
                     enableSpinner(false);
                     return;
-                }
-
-                if (password.length() < 6) {
-                    mPassword.setError("Password Must be >=6 Characters");
+                } else if (password.length() < 6) {
+                    passError.setError("Password Must be >=6 Characters");
                     enableSpinner(false);
                     return;
+                } else {
+                    passError.setError(null);
                 }
 
                 fAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
